@@ -4,6 +4,7 @@ import pathlib
 import subprocess
 import tempfile
 import uuid
+import threading
 
 from django.http import StreamingHttpResponse
 from django.shortcuts import render
@@ -52,6 +53,7 @@ def download_mp4(m3u8_file_name: str, mp4_file_name: str, download_dir: pathlib.
     ffmpeg -protocol_whitelist file,http,https,tcp,tls,crypto -i MIE.m3u8 -c copy -bsf:a aac_adtstoasc MIE.mp4"""
 
     output_filepath = download_dir / f"{mp4_file_name}.mp4"
+    log_filepath = download_dir / f"{mp4_file_name}.log"
 
     args = [
         "ffmpeg",
@@ -66,32 +68,30 @@ def download_mp4(m3u8_file_name: str, mp4_file_name: str, download_dir: pathlib.
         str(output_filepath),
     ]
     print(" ".join(args))
-    process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # try:
-    #     output = subprocess.check_output(args)
-    #     print(output)
-    # except subprocess.CalledProcessError as e:
-    #     print(e.output)
-    # return process
 
+    # 로그 파일을 열어서 stdout과 stderr를 리다이렉트
+    with open(log_filepath, "w", encoding="utf-8") as log_file:
+        process = subprocess.Popen(
+            args,
+            stdout=log_file,
+            stderr=subprocess.STDOUT,  # stderr도 같은 파일로 리다이렉트
+            universal_newlines=True,  # 텍스트 모드로 열기
+        )
 
-# def stream_mp4(m3u8_file_name: str, mp4_file_name: str):
-#     """스트리밍 다운로드를 처리하는 뷰 함수"""
+    # PID 파일 생성
+    pid_filepath = download_dir / f"{mp4_file_name}.pid"
+    with open(pid_filepath, "w") as pid_file:
+        pid_file.write(str(process.pid))
 
-#     def file_iterator():
-#         process = download_mp4(m3u8_file_name, mp4_file_name)
-#         with open(mp4_file_name, "rb") as f:
-#             while True:
-#                 chunk = f.read(8192)  # 8KB chunks
-#                 if not chunk:
-#                     break
-#                 yield chunk
-#         # Clean up the temporary file
-#         os.remove(mp4_file_name)
+    # 프로세스 종료 시 PID 파일 삭제를 위한 스레드 함수
+    def cleanup_pid_file():
+        process.wait()  # 프로세스가 종료될 때까지 대기
+        try:
+            if pid_filepath.exists():
+                pid_filepath.unlink()  # PID 파일 삭제
+        except Exception as e:
+            print(f"PID 파일 삭제 중 오류 발생: {e}")
 
-#     # content_type, _ = mimetypes.guess_type(mp4_file_name)
-#     response = StreamingHttpResponse(
-#         file_iterator(), content_type="application/octet-stream"
-#     )
-#     response["Content-Disposition"] = f'attachment; filename="{mp4_file_name}"'
-#     return response
+    # 백그라운드에서 PID 파일 정리 작업 실행
+    cleanup_thread = threading.Thread(target=cleanup_pid_file, daemon=True)
+    cleanup_thread.start()
