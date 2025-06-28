@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import uuid
 import threading
+from datetime import datetime
 
 from django.http import StreamingHttpResponse
 from django.shortcuts import render
@@ -12,6 +13,51 @@ from django.shortcuts import render
 from .form import FileForm
 
 # Create your views here.
+
+
+def get_download_jobs():
+    """data 폴더 내의 다운로드 작업 목록을 반환"""
+    data_dir = pathlib.Path("data")
+    if not data_dir.exists():
+        return []
+
+    jobs = []
+    for work_dir in data_dir.iterdir():
+        if work_dir.is_dir():
+            job_info = {
+                "work_dir": work_dir.name,
+                "work_dir_path": str(work_dir),
+                "created_time": datetime.fromtimestamp(work_dir.stat().st_ctime),
+                "mp4_files": [],
+                "has_log": False,
+                "log_file": None,
+            }
+
+            # 작업 폴더 내의 파일들 확인
+            for file_path in work_dir.iterdir():
+                if file_path.is_file():
+                    if file_path.suffix.lower() == ".mp4":
+                        # MP4 파일만 수집
+                        file_info = {
+                            "name": file_path.name,
+                            "size": file_path.stat().st_size,
+                            "modified_time": datetime.fromtimestamp(
+                                file_path.stat().st_mtime
+                            ),
+                        }
+                        job_info["mp4_files"].append(file_info)
+                    elif file_path.suffix.lower() == ".log":
+                        # 로그 파일 존재 여부만 확인
+                        job_info["has_log"] = True
+                        job_info["log_file"] = file_path.name
+
+            # MP4 파일들을 수정 시간순으로 정렬
+            job_info["mp4_files"].sort(key=lambda x: x["modified_time"], reverse=True)
+            jobs.append(job_info)
+
+    # 작업 폴더들을 생성 시간순으로 정렬 (최신순)
+    jobs.sort(key=lambda x: x["created_time"], reverse=True)
+    return jobs
 
 
 def index(request):
@@ -29,7 +75,11 @@ def index(request):
             # return render(request, "index.html", {"form": form})
     else:
         form = FileForm()
-    return render(request, "index.html", {"form": form})
+
+    # GET 요청 시 다운로드 작업 목록 가져오기
+    download_jobs = get_download_jobs()
+
+    return render(request, "index.html", {"form": form, "download_jobs": download_jobs})
 
 
 def make_m3u8(content: str, work_dir: pathlib.Path):
@@ -95,3 +145,36 @@ def download_mp4(m3u8_file_name: str, mp4_file_name: str, download_dir: pathlib.
     # 백그라운드에서 PID 파일 정리 작업 실행
     cleanup_thread = threading.Thread(target=cleanup_pid_file, daemon=True)
     cleanup_thread.start()
+
+
+def view_log(request, work_dir, log_file):
+    """로그 파일 내용을 보여주는 뷰"""
+    log_filepath = pathlib.Path("data") / work_dir / log_file
+
+    if not log_filepath.exists():
+        return render(
+            request,
+            "index.html",
+            {
+                "form": FileForm(),
+                "download_jobs": get_download_jobs(),
+                "error_message": "로그 파일을 찾을 수 없습니다.",
+            },
+        )
+
+    try:
+        with open(log_filepath, "r", encoding="utf-8") as f:
+            log_content = f.read()
+    except Exception as e:
+        log_content = f"로그 파일을 읽을 수 없습니다: {e}"
+
+    return render(
+        request,
+        "index.html",
+        {
+            "form": FileForm(),
+            "download_jobs": get_download_jobs(),
+            "log_content": log_content,
+            "log_file_name": log_file,
+        },
+    )
