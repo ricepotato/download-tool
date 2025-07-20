@@ -5,10 +5,12 @@ import subprocess
 import tempfile
 import uuid
 import threading
+import shutil
 from datetime import datetime
 
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 
 from .form import FileForm
 
@@ -79,7 +81,9 @@ def index(request):
     # GET 요청 시 다운로드 작업 목록 가져오기
     download_jobs = get_download_jobs()
 
-    return render(request, "index.html", {"form": form, "download_jobs": download_jobs})
+    return render(
+        request, "downloads/index.html", {"form": form, "download_jobs": download_jobs}
+    )
 
 
 def make_m3u8(content: str, work_dir: pathlib.Path):
@@ -178,3 +182,27 @@ def view_log(request, work_dir, log_file):
             "log_file_name": log_file,
         },
     )
+
+
+def delete_job(request, work_dir):
+    """작업 폴더를 삭제하는 뷰"""
+    work_dir_path = pathlib.Path("data") / work_dir
+
+    if work_dir_path.exists() and work_dir_path.is_dir():
+        try:
+            # 작업 폴더와 그 안의 모든 파일 삭제
+            shutil.rmtree(work_dir_path)
+        except Exception as e:
+            # 삭제 실패 시 오류 메시지와 함께 리다이렉트
+            return render(
+                request,
+                "index.html",
+                {
+                    "form": FileForm(),
+                    "download_jobs": get_download_jobs(),
+                    "error_message": f"작업 삭제 중 오류가 발생했습니다: {e}",
+                },
+            )
+
+    # 삭제 성공 시 메인 페이지로 리다이렉트
+    return HttpResponseRedirect(reverse("index"))

@@ -24,4 +24,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", RedirectView.as_view(url="downloads/", permanent=True)),
     path("downloads/", include("downloads.urls")),
+    path("blokr/", include("blokr.urls")),
 ]

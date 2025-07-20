@@ -8,16 +8,13 @@
     <link rel="stylesheet" href="{% static 'downloads/css/style.css' %}">
 </head>
 <body>
-    <h1>Downloads</h1>
-    <p>This is the downloads page</p>
-    
+    <h1>새 다운로드 작업</h1>
     {% if error_message %}
     <div class="error-message">
         {{ error_message }}
     </div>
     {% endif %}
     
-    <h2>새 다운로드 작업</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
@@ -36,6 +33,7 @@
             <div class="job-header">
                 작업 폴더: {{ job.work_dir }}<br>
                 생성 시간: {{ job.created_time|date:"Y-m-d H:i:s" }}
+                <a href="{% url 'delete_job' job.work_dir %}" class="delete-button" onclick="return confirm('정말로 이 작업을 삭제하시겠습니까?')">작업 삭제</a>
             </div>
             <div class="file-list">
                 {% if job.mp4_files %}
