@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Downloads</title>
-    <link rel="stylesheet" href="{% static 'downloads/css/style.css' %}">
+    <link rel="stylesheet"  type="text/css" href="{% static 'css/global.css' %}">
+    <style>
+        
+    </style>
 </head>
 <body>
     <h1>새 다운로드 작업</h1>
@@ -15,11 +18,13 @@
     </div>
     {% endif %}
     
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
     
     {% if log_content %}
     <h2>로그 파일 내용: {{ log_file_name }}</h2>
