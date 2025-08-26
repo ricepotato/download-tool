@@ -23,3 +23,11 @@ class AnimalTestCase(TestCase):
         output = Path("blokr_data/4eece747-706f-4e42-8ea2-6644b0fc5118/index.html")
 
         clean_content(origin1, output)
+
+    def test_cleaner3(self):
+        origin1 = Path(
+            "blokr_data/3e3975ff-0772-4919-a015-8e0137ddeb8f/index_origin.html"
+        )
+        output = Path("blokr_data/3e3975ff-0772-4919-a015-8e0137ddeb8f/index.html")
+
+        clean_content(origin1, output)

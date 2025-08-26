@@ -122,7 +122,7 @@ STATIC_URL = "static/"
 
 # 개발 환경에서 static 파일을 찾을 디렉토리들
 STATICFILES_DIRS = [
-    BASE_DIR / "downloads" / "static",
+    BASE_DIR / "static",
 ]
 
 # Default primary key field type

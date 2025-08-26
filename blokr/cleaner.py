@@ -82,6 +82,10 @@ def remove_styles_scripts(html_content: str, use_regex=False):
 
 def crop_element_by_css_selectors(html_content: str, crop_selectors: list[str]):
     soup = BeautifulSoup(html_content, "html.parser")
+
+    title_tag = soup.select_one("title")
+    title_text = title_tag.text if title_tag is not None else ""
+
     element = None
     for selector in crop_selectors:
         element = soup.select_one(selector)
@@ -90,7 +94,7 @@ def crop_element_by_css_selectors(html_content: str, crop_selectors: list[str]):
 
     # 새로운 HTML 문서 생성
     new_soup = BeautifulSoup(
-        "<!DOCTYPE html>\n<html>\n<head>\n<meta charset='utf-8'>\n<title>Cleaned Content</title>\n</head>\n<body>\n</body>\n</html>",
+        f"<!DOCTYPE html>\n<html>\n<head>\n<meta charset='utf-8'>\n<title>{title_text}</title>\n</head>\n<body>\n</body>\n</html>",
         "html.parser",
     )
 
@@ -123,9 +127,24 @@ def clean_content(origin: Path, output: Path):
     crop_selectors = [
         "#thema_wrapper > div.at-body > div > div > div.col-md-10.at-col.at-main > div > div.view-wrap",
         "#content article.post",
+        "#main-single-page",
     ]
 
     cropped_html = crop_element_by_css_selectors(cleaned_html, crop_selectors)
 
     with open(output, "w", encoding="utf-8") as f:
         f.write(cropped_html)
+
+
+def get_title(html_content: str):
+    soup = BeautifulSoup(html_content, "html.parser")
+    title_tag = soup.select_one("title")
+    if title_tag is not None:
+        return title_tag.text
+    else:
+        return None
+
+
+def get_title_from_file(file_path: Path):
+    with open(file_path, "r", encoding="utf-8") as f:
+        return get_title(f.read())
