@@ -1,0 +1,53 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ricepotato</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'images/favicon-96x96.png' %}"
+      sizes="96x96"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="{% static 'images/favicon.svg' %}"
+    />
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="logo-section"></div>
+      </header>
+
+      <main class="main-content">
+        <div class="welcome-card">
+          <h2 class="welcome-title">
+            <img
+              src="{% static 'images/favicon.svg' %}"
+              alt="ricepotato logo"
+              class="logo"
+            />
+          </h2>
+          <p class="welcome-text">Hello 👋 This is ricepotato's website 😊</p>
+          <div class="features">
+            <div class="feature-item">
+              <span class="feature-icon">🚀</span>
+              <a href="/blokr" class="feature-text blokr-link">blokr</a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <p>&copy; 2024 ricepotato. All rights reserved.</p>
+      </footer>
+    </div>
+  </body>
+</html>
