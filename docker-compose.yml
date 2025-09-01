@@ -5,6 +5,7 @@ services:
       - SECRET_KEY=your-secret-key-here
       - DEBUG=False
       - ALLOWED_HOSTS=web.ricepotato.dev
+      - CSRF_TRUSTED_ORIGINS=https://web.ricepotato.dev
     restart: unless-stopped
 
   webserver:
