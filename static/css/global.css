@@ -28,6 +28,24 @@
   text-decoration: none;
 }
 
+.download-button {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  text-decoration: none;
+  border-radius: 3px;
+  font-size: 0.9em;
+  margin-left: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.download-button:hover {
+  background-color: #0056b3;
+  text-decoration: none;
+}
+
 .file-list {
   margin-left: 20px;
 }

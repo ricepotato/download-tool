@@ -1,67 +1,71 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Downloads</title>
-    <link rel="stylesheet"  type="text/css" href="{% static 'css/global.css' %}">
-    <style>
-        
-    </style>
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/global.css' %}"
+    />
+    <style></style>
+  </head>
+  <body>
     <h1>새 다운로드 작업</h1>
     {% if error_message %}
-    <div class="error-message">
-        {{ error_message }}
-    </div>
+    <div class="error-message">{{ error_message }}</div>
     {% endif %}
-    
+
     <div class="form-container">
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Submit</button>
-        </form>
+      <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+        <button type="submit">Submit</button>
+      </form>
     </div>
-    
+
     {% if log_content %}
     <h2>로그 파일 내용: {{ log_file_name }}</h2>
     <div class="log-content">{{ log_content }}</div>
     {% endif %}
-    
+
     <h2>다운로드 작업 목록</h2>
-    {% if download_jobs %}
-        {% for job in download_jobs %}
-        <div class="job-container">
-            <div class="job-header">
-                작업 폴더: {{ job.work_dir }}<br>
-                생성 시간: {{ job.created_time|date:"Y-m-d H:i:s" }}
-                <a href="{% url 'delete_job' job.work_dir %}" class="delete-button" onclick="return confirm('정말로 이 작업을 삭제하시겠습니까?')">작업 삭제</a>
-            </div>
-            <div class="file-list">
-                {% if job.mp4_files %}
-                    {% for file in job.mp4_files %}
-                    <div class="file-item">
-                        <div>{{ file.name }}</div>
-                        <div class="file-size">크기: {{ file.size|filesizeformat }}</div>
-                        <div class="file-time">수정: {{ file.modified_time|date:"Y-m-d H:i:s" }}</div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="failure-message">
-                        다운로드 작업 실패
-                        {% if job.has_log %}
-                        <a href="{% url 'view_log' job.work_dir job.log_file %}" class="log-link">로그 파일 보기</a>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </div>
+    {% if download_jobs %} {% for job in download_jobs %}
+    <div class="job-container">
+      <div class="job-header">
+        작업 폴더: {{ job.work_dir }}<br />
+        생성 시간: {{ job.created_time|date:"Y-m-d H:i:s" }}
+        <a
+          href="{% url 'downloads-delete-job' job.work_dir %}"
+          class="delete-button"
+          onclick="return confirm('정말로 이 작업을 삭제하시겠습니까?')"
+          >작업 삭제</a
+        >
+        <a
+          href="{% url 'downloads-detail' job.work_dir %}"
+          class="download-button"
+          download="true"
+          target="_blank"
+          >다운로드</a
+        >
+      </div>
+      <div class="file-list">
+        {% if job.mp4_files %} {% for file in job.mp4_files %}
+        <div class="file-item">
+          <div>{{ file.name }}</div>
+          <div class="file-size">크기: {{ file.size|filesizeformat }}</div>
+          <div class="file-time">
+            수정: {{ file.modified_time|date:"Y-m-d H:i:s" }}
+          </div>
         </div>
-        {% endfor %}
-    {% else %}
-        <div class="no-jobs">다운로드 작업이 없습니다.</div>
+        {% endfor %} {% else %}
+        <div class="failure-message">다운로드 작업 실패</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <div class="no-jobs">다운로드 작업이 없습니다.</div>
     {% endif %}
-</body>
+  </body>
 </html>

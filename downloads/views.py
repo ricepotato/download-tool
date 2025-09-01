@@ -1,14 +1,13 @@
-import mimetypes
 import os
 import pathlib
-import subprocess
-import tempfile
-import uuid
-import threading
 import shutil
+import subprocess
+import threading
+import uuid
+from urllib import parse
 from datetime import datetime
 
-from django.http import StreamingHttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -73,8 +72,8 @@ def index(request):
             m3u8_filepath = make_m3u8(file_content, work_dir)
             download_mp4(m3u8_filepath, file_name, work_dir)
 
-            # return stream_mp4(filepath, file_name)
-            # return render(request, "index.html", {"form": form})
+            return HttpResponseRedirect(reverse("downloads-index"))
+
     else:
         form = FileForm()
 
@@ -84,6 +83,39 @@ def index(request):
     return render(
         request, "downloads/index.html", {"form": form, "download_jobs": download_jobs}
     )
+
+
+def file_chunk_generator(file_path, chunk_size=8192):
+    with open(file_path, "rb") as file:
+        while chunk := file.read(chunk_size):
+            yield chunk
+
+
+def detail(request, id: str):
+    data_dir = pathlib.Path("data")
+    work_dir = data_dir / id
+
+    if not work_dir.exists():
+        # bad request
+        return HttpResponse(status=400)
+
+    for file in work_dir.iterdir():
+        if file.suffix.lower() == ".mp4":
+            print(file.name)
+            response = StreamingHttpResponse(
+                streaming_content=file_chunk_generator(file)
+            )
+
+            download_filename = parse.quote(file.name)
+            response["Content-Type"] = "application/octet-stream"
+            response["Content-Disposition"] = (
+                f"attachment; filename={download_filename}"
+            )
+            response["Content-Length"] = os.path.getsize(file)
+
+            return response
+
+    return HttpResponse(status=404)
 
 
 def make_m3u8(content: str, work_dir: pathlib.Path):
@@ -205,4 +237,4 @@ def delete_job(request, work_dir):
             )
 
     # 삭제 성공 시 메인 페이지로 리다이렉트
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("downloads-index"))
