@@ -13,3 +13,4 @@ blokr_data/*
 
 tmp/*
 staticfiles/*
+db.sqlite3

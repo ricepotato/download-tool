@@ -27,7 +27,9 @@ SECRET_KEY = "django-insecure-4ez4o@svp3+om$j+$%%hq#!6cblt^f@q-m!oss^^--&*o#$x(c
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1"
+).split(",")
 
 
 # Application definition
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "downloads",
     "blokr",
+    "linker",
 ]
 
 MIDDLEWARE = [

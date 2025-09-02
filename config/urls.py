@@ -27,4 +27,5 @@ urlpatterns = [
     path("", root_index),
     path("downloads/", include("downloads.urls")),
     path("blokr/", include("blokr.urls")),
+    path("linker/", include("linker.urls")),
 ]
