@@ -15,15 +15,16 @@ from .form import FileForm
 
 # Create your views here.
 
+DATA_DIR = pathlib.Path("data") / "downloads"
+
 
 def get_download_jobs():
     """data 폴더 내의 다운로드 작업 목록을 반환"""
-    data_dir = pathlib.Path("data")
-    if not data_dir.exists():
+    if not DATA_DIR.exists():
         return []
 
     jobs = []
-    for work_dir in data_dir.iterdir():
+    for work_dir in DATA_DIR.iterdir():
         if work_dir.is_dir():
             job_info = {
                 "work_dir": work_dir.name,
@@ -92,7 +93,7 @@ def file_chunk_generator(file_path, chunk_size=8192):
 
 
 def detail(request, id: str):
-    data_dir = pathlib.Path("data")
+    data_dir = DATA_DIR
     work_dir = data_dir / id
 
     if not work_dir.exists():
@@ -128,7 +129,7 @@ def make_m3u8(content: str, work_dir: pathlib.Path):
 
 
 def new_workdir():
-    workdir = pathlib.Path("data") / str(uuid.uuid4())
+    workdir = DATA_DIR / str(uuid.uuid4())
     workdir.mkdir(parents=True, exist_ok=True)
     return workdir
 
@@ -185,7 +186,7 @@ def download_mp4(m3u8_file_name: str, mp4_file_name: str, download_dir: pathlib.
 
 def view_log(request, work_dir, log_file):
     """로그 파일 내용을 보여주는 뷰"""
-    log_filepath = pathlib.Path("data") / work_dir / log_file
+    log_filepath = DATA_DIR / work_dir / log_file
 
     if not log_filepath.exists():
         return render(
@@ -218,7 +219,7 @@ def view_log(request, work_dir, log_file):
 
 def delete_job(request, work_dir):
     """작업 폴더를 삭제하는 뷰"""
-    work_dir_path = pathlib.Path("data") / work_dir
+    work_dir_path = DATA_DIR / work_dir
 
     if work_dir_path.exists() and work_dir_path.is_dir():
         try:
