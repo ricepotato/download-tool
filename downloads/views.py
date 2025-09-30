@@ -86,7 +86,7 @@ def index(request):
     )
 
 
-def file_chunk_generator(file_path, chunk_size=8192):
+def file_chunk_generator(file_path, chunk_size=8192 * 10):
     with open(file_path, "rb") as file:
         while chunk := file.read(chunk_size):
             yield chunk

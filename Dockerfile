@@ -26,7 +26,10 @@ RUN useradd -m -r appuser && \
 # Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1 
- 
+
+RUN apt update
+RUN apt install -y ffmpeg
+
 # Switch to non-root user
 USER appuser
  
