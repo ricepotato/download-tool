@@ -7,6 +7,8 @@ services:
       - ALLOWED_HOSTS=web.ricepotato.dev
       - CSRF_TRUSTED_ORIGINS=https://web.ricepotato.dev
     restart: always
+    volumes:
+      - /home/ricepotato/data:/app/data
 
   webserver:
     build:
