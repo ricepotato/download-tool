@@ -4,8 +4,8 @@ import shutil
 import subprocess
 import threading
 import uuid
-from urllib import parse
 from datetime import datetime
+from urllib import parse
 
 from django.http import HttpResponse, HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import render
@@ -40,19 +40,19 @@ def get_download_jobs():
                 if file_path.is_file():
                     if file_path.suffix.lower() == ".mp4":
                         # MP4 파일만 수집
+                        # pid 파일이 존재하지 않으면 완료. url encoding
                         file_info = {
                             "name": file_path.name,
                             "size": file_path.stat().st_size,
                             "modified_time": datetime.fromtimestamp(
                                 file_path.stat().st_mtime
                             ),
+                            "completed": not file_path.with_suffix(".pid").exists(),
+                            "download_url": parse.quote(
+                                f"/_downloads/{work_dir.name}/{file_path.name}"
+                            ),
                         }
                         job_info["mp4_files"].append(file_info)
-                    elif file_path.suffix.lower() == ".log":
-                        # 로그 파일 존재 여부만 확인
-                        job_info["has_log"] = True
-                        job_info["log_file"] = file_path.name
-
             # MP4 파일들을 수정 시간순으로 정렬
             job_info["mp4_files"].sort(key=lambda x: x["modified_time"], reverse=True)
             jobs.append(job_info)

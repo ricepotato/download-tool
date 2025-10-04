@@ -25,17 +25,12 @@
       </form>
     </div>
 
-    {% if log_content %}
-    <h2>로그 파일 내용: {{ log_file_name }}</h2>
-    <div class="log-content">{{ log_content }}</div>
-    {% endif %}
-
     <h2>다운로드 작업 목록</h2>
     {% if download_jobs %} {% for job in download_jobs %}
     <div class="job-container">
       <div class="job-header">
         작업 폴더: {{ job.work_dir }}<br />
-        생성 시간: {{ job.created_time|date:"Y-m-d H:i:s" }}
+        생성 시간: {{ job.created_time|date:"Y-m-d H:i:s" }} <br />
         <a
           href="{% url 'downloads-delete-job' job.work_dir %}"
           class="delete-button"
@@ -43,7 +38,7 @@
           >작업 삭제</a
         >
         <a
-          href="{% url 'downloads-detail' job.work_dir %}"
+          href="{{ job.download_url }}"
           class="download-button"
           download="true"
           target="_blank"
@@ -53,7 +48,8 @@
       <div class="file-list">
         {% if job.mp4_files %} {% for file in job.mp4_files %}
         <div class="file-item">
-          <div>{{ file.name }}</div>
+          <a href="{{ file.download_url }}">{{ file.name }}</a>
+
           <div class="file-size">크기: {{ file.size|filesizeformat }}</div>
           <div class="file-time">
             수정: {{ file.modified_time|date:"Y-m-d H:i:s" }}
